@@ -30,12 +30,12 @@ const std::string TEMPLATED_HEADER_FILE = (std::string(__FILE__).substr(std::str
 const int TEMPLATED_HEADER_LINE = (__LINE__ + 3);
 // Please set these before you start on the relevant project: 
 // Uncomment this to test a templated version of the stack code.
-#define TEMPLATED_LINKEDLIST
+//#define TEMPLATED_LINKEDLIST
 
 // another consts for student messages
 const int TEMPLATED_HEADER_SECOND_SET_OF_LINKED_LIST_METHODS = (__LINE__ + 2);
 // Uncomment this to enable the tests for the methods in Module 8 (the second set of tests)
-// #define SECOND_SET_OF_LINKED_LIST_METHODS
+#define SECOND_SET_OF_LINKED_LIST_METHODS
 
 #ifndef TEMPLATED_LINKEDLIST
 // This code section is for the initial [non-templated] version of the code.
@@ -60,7 +60,7 @@ private:
 	llNode* tail; // last node
 public:
 	linkedList(); // M7 // default ctor
-	
+
 	// Rule of threes
 	linkedList(const linkedList&); // M8 // copy ctor
 	~linkedList(); // M7 // dtor
@@ -79,7 +79,11 @@ public:
 														   // print a linkedList to a stream (e.g., std::cout)
 	void printToStream(std::ostream& outputStream) const; // M7 (I write in the videos)
 	llNode* search(std::string) const; // M8
-	bool contains(std::string findMe) const ; // M8 // write inline using search
+	inline bool contains(std::string findMe) const { // M8 // write inline using search
+		//Step 1: Call the search method and see if it returns null
+		llNode* containsNode = search(findMe);
+		return (search(findMe));
+	}
 	llNode* findAtPosition(int) const; // M8 // 0 = first item, 1 == second ....
 
 	// mutators
@@ -89,10 +93,18 @@ public:
 	statusCode insertAfter(llNode*, std::string); // M8
 	statusCode removeAtTail(std::string&); // M8
 	statusCode remove(llNode*); // M8  
-	statusCode remove(std::string removeMe); // M8 // write inline
+	inline statusCode remove(std::string removeMe) { // M8 // write inline
+		//Step 1: First call search(string)
+		llNode* removeNode = search(removeMe);
+		//Step 2: If search succeeds, call remove (node *)
+		if (0 == removeNode) {
+			return farmingdale::statusCode::FAILURE;
+		}
+		return (remove(removeNode));
+	}
 
 
-	
+
 };
 // Write the following here as outside inline functions: (all M7)
 // operator!= linkedList,linkedList
@@ -121,14 +133,15 @@ inline std::ostream& operator<<(std::ostream& theStream, const farmingdale::link
 // This is the TEMPLATED_STACK code, for the templated version of Stack
 namespace farmingdale {
 	// Note: namespaces are additive, so you can add new elements to this namespace in other files or later
-	struct llNode;
+	template <class CL> struct llNode;
 	template <class CL> class linkedList;
 }
 
 
 // a node of my ll
-struct farmingdale::llNode {
-	std::string data;
+
+template <class CL> struct farmingdale::llNode {
+	CL data;
 	llNode* next;
 };
 
@@ -136,8 +149,8 @@ struct farmingdale::llNode {
 // M7 = we will implement in Module 7, M8 = implement in Module 8
 template <class CL> class farmingdale::linkedList {
 private:
-	llNode* head; // first node
-	llNode* tail; // last node
+	llNode<CL>* head; // first node
+	llNode<CL>* tail; // last node
 public:
 	linkedList(); // M7 // default ctor
 
@@ -155,20 +168,20 @@ public:
 	statusCode getHead(CL&) const; // M7
 	statusCode getTail(CL&) const; // M7
 	bool operator==(const linkedList&) const; // M7 (I write in the videos) // base comparison operator
-	bool operator==(const std::deque<std::string>&) const; //M7 (I write in the videos)
+	bool operator==(const std::deque<CL>&) const; //M7 (I write in the videos)
 														   // print a linkedList to a stream (e.g., std::cout)
 	void printToStream(std::ostream& outputStream) const; // M7 (I write in the videos)
-	llNode* search(CL) const; // M8
+	llNode<CL>* search(CL) const; // M8
 	bool contains(CL findMe) const; // M8 // write inline using search
-	llNode* findAtPosition(int) const; // M8 // 0 = first item, 1 == second ....
+	llNode<CL>* findAtPosition(int) const; // M8 // 0 = first item, 1 == second ....
 
 	// mutators
 	statusCode insertAtHead(CL); // M7
 	statusCode removeAtHead(CL&); // M7
 	statusCode insertAtTail(CL); // M7
-	statusCode insertAfter(llNode*, CL); // M8
+	statusCode insertAfter(llNode<CL>*, CL); // M8
 	statusCode removeAtTail(CL&); // M8
-	statusCode remove(llNode*); // M8  
+	statusCode remove(llNode<CL>*); // M8  
 	statusCode remove(CL removeMe); // M8 // write inline
 
 
@@ -200,7 +213,7 @@ template <class CL> inline std::ostream& operator<<(std::ostream& theStream, con
 // print a linkedList to a stream (e.g., std::cout)
 template <class CL> void farmingdale::linkedList<CL>::printToStream(std::ostream& outputStream) const {
 	//traverse and send the data of each node to outPutStream
-	llNode* myIter = head;
+	llNode<CL>* myIter = head;
 	while (0 != myIter) {
 		if (myIter != head) {
 			outputStream << ";";
@@ -217,10 +230,10 @@ template <class CL> farmingdale::linkedList<CL>::linkedList()
 	tail(0)
 {}
 
-template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::getHead(CL& returnedValue) const{ // M7
+template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::getHead(CL& returnedValue) const { // M7
 	//Step 1: If the list is empty, return failure
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Put the head's data value into returnedValue
 	returnedValue = head->data;
@@ -231,22 +244,22 @@ template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::getHead
 template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::getTail(CL& returnedValue) const { // M7
 	//Step 1: If the list is empty, return failure
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Put the tail's data value into returnedValue
 	returnedValue = tail->data;
 	//Step 3: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 
 template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::insertAtHead(CL addMe) { // M7
 	//Step 1: Allocate the memory for a new node. Return FAILURE if that fails
-	llNode* temp;
+	llNode<CL>* temp;
 	try {
-		temp = new llNode;
+		temp = new llNode<CL>;
 	}
 	catch (std::bad_alloc) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Assign addMe to the data field of the new node
 	temp->data = addMe;
@@ -259,17 +272,17 @@ template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::insertA
 		tail = temp;
 	}
 	//Step 6: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 
 template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::insertAtTail(CL addMe) {
 	//Step 1: Allocate a new node, return FAILURE if we can't allocate
-	llNode* temp;
+	llNode<CL>* temp;
 	try {
-		temp = new llNode;
+		temp = new llNode<CL>;
 	}
 	catch (std::bad_alloc) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Set the data field of the new node to addMe
 	temp->data = addMe;
@@ -287,18 +300,18 @@ template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::insertA
 	tail = temp;
 
 	//Step 7: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::removeAtHead(CL& removedVal) {
 	//Step 1: If the list is empty, then we fail
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: If the list is not empty, then put the data from head into removedVal
 	removedVal = head->data;
 
 	//Step 3: Make head into the current head's next
-	llNode* current = head;
+	llNode<CL>* current = head;
 	head = head->next;
 	//Step 4: If head is null, tail should be made null too
 	if (0 == head) {
@@ -307,13 +320,13 @@ template <class CL> farmingdale::statusCode farmingdale::linkedList<CL>::removeA
 	//Step 5: Delete the old head
 	delete current;
 	//Step 6: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 
 }
 
 template <class CL> farmingdale::linkedList<CL>::~linkedList() {
 	//Step 1: Traverse the linked list
-	llNode* current = head;
+	llNode<CL>* current = head;
 	while (0 != current) {
 		head = head->next;
 		//Step 2: Delete each node in turn
@@ -323,8 +336,8 @@ template <class CL> farmingdale::linkedList<CL>::~linkedList() {
 }
 
 template <class CL> bool farmingdale::linkedList<CL>::operator==(const linkedList<CL>& rhs) const {
-	farmingdale::llNode* current = head;
-	farmingdale::llNode* rhsCurrent = rhs.head;
+	farmingdale::llNode<CL>* current = head;
+	farmingdale::llNode<CL>* rhsCurrent = rhs.head;
 	//Step 1:  Do a parallel traversal
 	while ((0 != current) && (0 != rhsCurrent)) {
 		//Step 2: If, during the traversal, current's data and rhs' data are not the same, return false
@@ -350,9 +363,9 @@ template <class CL> bool farmingdale::linkedList<CL>::operator==(const linkedLis
 //if (myLL = myDeque)
 //if (myDeque == myLL)			myDeque.operator==(myLL)
 
-template <class CL> bool farmingdale::linkedList<CL>::operator==(const std::deque<std::string>& rhs) const {
+template <class CL> bool farmingdale::linkedList<CL>::operator==(const std::deque<CL>& rhs) const {
 	//Step 1: Do a parallel traversal
-	llNode* current = head;
+	llNode<CL>* current = head;
 	std::deque<std::string>::const_iterator rhsIterator = rhs.begin();
 	while (0 != current && rhs.end() != rhsIterator) {
 		//Step 2: If at any step, the data differs, return false
@@ -371,7 +384,7 @@ template <class CL> bool farmingdale::linkedList<CL>::operator==(const std::dequ
 }
 
 template <class CL> farmingdale::linkedList<CL>::linkedList(const linkedList<CL>& copyMe) : head(0), tail(0) {
-	llNode* otherLLNode = copyMe.head;
+	llNode<CL>* otherLLNode = copyMe.head;
 	while (0 != otherLLNode) {
 		llNode* temp = new llNode;
 		temp->data = otherLLNode->data;

@@ -37,23 +37,23 @@ farmingdale::linkedList::linkedList()
 farmingdale::statusCode farmingdale::linkedList::getHead(std::string& returnedValue) const { // M7
 	//Step 1: If the list is empty, return failure
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Put the head's data value into returnedValue
 	returnedValue = head->data;
 	//Step 3: Return SUCCESS
-	return farmingdale::SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 	
 }
 farmingdale::statusCode farmingdale::linkedList::getTail(std::string& returnedValue) const { // M7
 	//Step 1: If the list is empty, return failure
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Put the tail's data value into returnedValue
 	returnedValue = tail->data;
 	//Step 3: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 
 farmingdale::statusCode farmingdale::linkedList::insertAtHead(std::string addMe) { // M7
@@ -63,7 +63,7 @@ farmingdale::statusCode farmingdale::linkedList::insertAtHead(std::string addMe)
 		temp = new llNode;
 	}
 	catch (std::bad_alloc) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Assign addMe to the data field of the new node
 	temp->data = addMe;
@@ -76,7 +76,7 @@ farmingdale::statusCode farmingdale::linkedList::insertAtHead(std::string addMe)
 		tail = temp;
 	}
 	//Step 6: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 
 farmingdale::statusCode farmingdale::linkedList::insertAtTail(std::string addMe) {
@@ -86,7 +86,7 @@ farmingdale::statusCode farmingdale::linkedList::insertAtTail(std::string addMe)
 		temp = new llNode;
 	}
 	catch (std::bad_alloc) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: Set the data field of the new node to addMe
 	temp->data = addMe;
@@ -104,12 +104,12 @@ farmingdale::statusCode farmingdale::linkedList::insertAtTail(std::string addMe)
 	tail = temp;
 		
 	//Step 7: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 }
 farmingdale::statusCode farmingdale::linkedList::removeAtHead(std::string& removedVal) {
 	//Step 1: If the list is empty, then we fail
 	if (isEmpty() == true) {
-		return FAILURE;
+		return farmingdale::statusCode::FAILURE;
 	}
 	//Step 2: If the list is not empty, then put the data from head into removedVal
 	removedVal = head->data;
@@ -124,7 +124,7 @@ farmingdale::statusCode farmingdale::linkedList::removeAtHead(std::string& remov
 	//Step 5: Delete the old head
 	delete current;
 	//Step 6: Return SUCCESS
-	return SUCCESS;
+	return farmingdale::statusCode::SUCCESS;
 
 }
 
@@ -202,6 +202,99 @@ farmingdale::linkedList::linkedList(const linkedList& copyMe) : head(0), tail(0)
 		tail = temp;
 		otherLLNode = otherLLNode->next;
 	}
+}
+
+/*farmingdale::linkedList::linkedList(const linkedList& copyMe) 
+	:
+	head(0), tail(0)
+{
+	llNode* otherNode = copyMe.head;
+	//Step 1: Traverse copyMe, in each iteration
+	while (0 != otherNode) {
+		//Step 2: Create a new node.
+		llNode* temp = new llNode;
+		//Step 3: Copy the content of the node from the traversal
+		temp->data = otherNode->data;
+		//Step 4: Add new node to the end of us
+		temp->next = 0;
+		//if we exist, add to our tail
+		if (0 != tail) {
+			tail->next = temp;
+		}
+		if (0 == head) {
+			head = temp;
+		}
+		tail = temp;
+		otherNode = otherNode->next;
+	}
+}*/
+
+farmingdale::statusCode farmingdale::linkedList::insertAfter(llNode* insertAfterMe, std::string stringToInsert) {
+	//Step 1: Create a new node. Fail if we cannot create this node (set data)
+	llNode* temp;
+	try {
+		temp = new llNode;
+	}
+	catch (std::bad_alloc) {
+		return farmingdale::statusCode::FAILURE;
+	}
+	//Step 2: Stitch the new node in between insertAfterMe and its successor
+		//take the next field of the new node, and put the successor there
+		//make new node the successor of insertAfterMe
+	//Step 3: If insertAfterMe was the tail, we are the new tail
+	//Step 4: Return success
+
+}
+
+farmingdale::llNode* farmingdale::linkedList::search(std::string) const {
+	//Step 1: Traverse the list but stop when we find it
+	//Step 2: return current
+}
+
+farmingdale::statusCode farmingdale::linkedList::removeAtTail(std::string& returnedString) {
+	//Step 1: If empty, return failure
+	if (isEmpty()) {
+		return farmingdale::statusCode::FAILURE;
+	}
+	//Step 2: Do a transversal with trailCurrent (TC) until current = tail
+	llNode* current = head;
+	llNode* trailCurrent = 0;
+	while (0 != current && current != tail) {
+		trailCurrent = current;
+		current = current->next;
+	}
+	//Step 3a: If there was a single node, then set head and tail to null
+	if (0 == trailCurrent) {
+		head = 0;
+		tail = 0;
+	}
+	else {
+	//Step 3b: Otherwise, stitch out current from the ll. (Make tc's into 0)
+		trailCurrent->next = 0;
+	}
+	tail = trailCurrent;
+	//Step 4: Get the string from current
+	returnedString = current->data;
+	//Step 5: Delete current
+	delete current;
+	//Step 6: Return success
+	return farmingdale::statusCode::SUCCESS;
+}
+
+farmingdale::statusCode farmingdale::linkedList::remove(llNode* removeMe) {
+	//Step 1: Do a traversal with a trailCurrent. Stop when current == removeMe
+	//Step 2: If a current is null, then removeMe is not in this LL--return failure
+	//Step 3: if removeMe is head, then remove the head
+	//Step 4: if current is an interior node (or tail), stitch out current 
+	//trailCurrent's new successor will be current's current successor
+	//Step 5: If tail was current, tail will become trailCurrent
+	//Step 6: delete current
+	//Step 7: return
+}
+
+farmingdale::llNode* farmingdale::linkedList::findAtPosition(int nth) const {
+	//Step 1: Traverse the list. Stop when you've iterated nth times. Stop is current null
+	//Step 2: Return current
 }
 
 #else // TEMPLATED_LINKEDLIST
